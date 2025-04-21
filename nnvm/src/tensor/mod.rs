@@ -3,16 +3,20 @@ mod kernel;
 mod nn;
 
 use rwrc::{LocalMut, LocalRef, RwRc};
-use tensor::digit_layout::DigitLayout;
+use tensor::{digit_layout::DigitLayout, ndarray_layout};
 
 pub use backward::BackwardTensorOf;
 pub use kernel::KernelTensorOf;
 pub use nn::{NNTensor, NNTensorId};
 
+const N: usize = 4;
+
+pub type ArrayLayout = ndarray_layout::ArrayLayout<N>;
+
 #[derive(Clone)]
 pub enum Tensor<T> {
-    Simple(tensor::Tensor<T, 4>),
-    Grouped(Box<[tensor::Tensor<T, 4>]>),
+    Simple(tensor::Tensor<T, N>),
+    Grouped(Box<[tensor::Tensor<T, N>]>),
 }
 
 impl<T> Tensor<T> {
@@ -39,6 +43,15 @@ impl<T> Tensor<T> {
                     .map(|t| t.map(&mut f))
                     .collect::<Box<_>>(),
             ),
+        }
+    }
+
+    pub fn transform(self, f: impl Fn(ArrayLayout) -> ArrayLayout) -> Self {
+        match self {
+            Self::Simple(tensor) => Self::Simple(tensor.transform(f)),
+            Self::Grouped(tensors) => {
+                Self::Grouped(tensors.into_iter().map(|t| t.transform(&f)).collect())
+            }
         }
     }
 }

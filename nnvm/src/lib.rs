@@ -1,3 +1,4 @@
+pub mod kernel;
 mod macros;
 mod nn;
 mod op;

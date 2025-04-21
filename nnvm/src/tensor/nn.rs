@@ -1,4 +1,4 @@
-﻿use super::Tensor;
+﻿use super::{ArrayLayout, Tensor};
 use rwrc::RwRc;
 use std::{
     ops::{Deref, DerefMut},
@@ -37,6 +37,13 @@ impl<T> Clone for NNTensor<T> {
 impl<T> NNTensor<T> {
     pub fn id(&self) -> NNTensorId {
         NNTensorId(self.id.clone())
+    }
+
+    pub fn transform(self, f: impl Fn(ArrayLayout) -> ArrayLayout) -> Self {
+        Self {
+            tensor: self.tensor.transform(f),
+            id: self.id.clone(),
+        }
     }
 }
 

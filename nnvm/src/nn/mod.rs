@@ -1,4 +1,5 @@
 ﻿mod embedding;
+mod linear;
 
 use crate::{Context, NNTensor, VirtualMachine};
 

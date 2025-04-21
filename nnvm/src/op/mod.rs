@@ -1,4 +1,5 @@
 ﻿pub mod embedding;
+pub mod linear;
 
 use crate::{NNTensor, VirtualMachine};
 use std::any::Any;
