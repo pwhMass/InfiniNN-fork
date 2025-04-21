@@ -1,4 +1,3 @@
-pub mod kernel;
 mod macros;
 mod nn;
 mod op;
@@ -29,7 +28,7 @@ pub trait Domain<VM: VirtualMachine> {
         &self,
         name: impl AsRef<str>,
         tensors: impl IntoIterator<Item = KernelTensorOf<'a, VM>>,
-        attributes: impl IntoIterator<Item = &'static dyn Any>,
+        attributes: impl IntoIterator<Item = &'a (dyn Any + 'static)>,
     );
 }
 

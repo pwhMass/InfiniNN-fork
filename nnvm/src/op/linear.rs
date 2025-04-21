@@ -1,7 +1,6 @@
-use std::any::Any;
-
 use super::Operator;
-use crate::{Domain, NNTensor, VirtualMachine, kernel::MutMulArgs, macros::dims};
+use crate::{Domain, NNTensor, VirtualMachine, macros::dims};
+use std::any::Any;
 
 pub struct Forward;
 pub struct Backward;
@@ -35,27 +34,17 @@ impl<VM: VirtualMachine> Operator<VM> for Forward {
 
                 domain.launch("rearrange", [y.kernel_mut(), bias.kernel_ref()], []);
 
-                const ATTR: &MutMulArgs = &MutMulArgs {
-                    beta: 1.0,
-                    alpha: 1.0,
-                    read_dst: true,
-                };
                 domain.launch(
                     "mut-mul",
                     [y.kernel_mut(), x.kernel_ref(), weight.kernel_ref()],
-                    [ATTR as &dyn Any],
+                    [&1. as &dyn Any, &1.],
                 );
             }
             None => {
-                const ATTR: &MutMulArgs = &MutMulArgs {
-                    beta: 1.0,
-                    alpha: 1.0,
-                    read_dst: false,
-                };
                 domain.launch(
                     "mut-mul",
                     [y.kernel_mut(), x.kernel_ref(), weight.kernel_ref()],
-                    [ATTR as &dyn Any],
+                    [&1. as &dyn Any, &1.],
                 );
             }
         }
@@ -89,17 +78,11 @@ impl<VM: VirtualMachine> Operator<VM> for Backward {
         let mut dx = NNTensor::<VM>::from(domain.tensor(x.dt(), &[m, k]));
         let mut dw = NNTensor::<VM>::from(domain.tensor(x.dt(), &[n, k]));
 
-        const ATTR: &MutMulArgs = &MutMulArgs {
-            beta: 1.0,
-            alpha: 1.0,
-            read_dst: false,
-        };
-
         // 计算 dx
         domain.launch(
             "mut-mul",
             [dx.kernel_mut(), dy.kernel_ref(), weight.kernel_ref()],
-            [ATTR as &dyn Any],
+            [&1. as &dyn Any, &1.],
         );
 
         // 计算 dw
@@ -107,7 +90,7 @@ impl<VM: VirtualMachine> Operator<VM> for Backward {
         domain.launch(
             "mut-mul",
             [dw.kernel_mut(), dy_transpose.kernel_ref(), x.kernel_ref()],
-            [ATTR as &dyn Any],
+            [&1. as &dyn Any, &1.],
         );
 
         // 计算 db
@@ -117,7 +100,7 @@ impl<VM: VirtualMachine> Operator<VM> for Backward {
             domain.launch(
                 "sum",
                 [db.kernel_mut(), dy.kernel_ref()],
-                [ATTR as &dyn Any],
+                [&1. as &dyn Any, &1.],
             );
             vec![dx, dw, db]
         } else {
