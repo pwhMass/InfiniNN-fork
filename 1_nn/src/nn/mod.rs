@@ -36,6 +36,7 @@ pub struct NNError {
 }
 
 pub mod macros {
+    #[macro_export]
     macro_rules! destruct {
         ([$( $name:ident ),+] = $iter:expr) => {
             let mut iter = $iter.into_iter();
@@ -44,6 +45,7 @@ pub mod macros {
         };
     }
 
+    #[macro_export]
     macro_rules! dims {
         ($pat:pat = $tensor:expr) => {
             let $pat = &*$tensor.shape() else {
@@ -52,5 +54,14 @@ pub mod macros {
         };
     }
 
-    pub(crate) use {destruct, dims};
+    #[macro_export]
+    macro_rules! strides {
+        ($pat:pat = $tensor:expr) => {
+            let &$pat = &*$tensor.layout().strides() else {
+                panic!("Ndim mismatch ( = {})", $tensor.layout().strides().len())
+            };
+        };
+    }
+
+    pub use {destruct, dims, strides};
 }

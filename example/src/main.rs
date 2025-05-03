@@ -8,6 +8,8 @@ use nn::{Dim, Exec, GraphBuilder, Node, TensorMeta, op};
 use std::time::Instant;
 use tensor::Tensor;
 
+mod cpu_op;
+
 // cargo run --release -- ../TinyStory-5M-v0.0-F32.gguf
 fn main() {
     let path = std::env::args_os().nth(1).unwrap();
