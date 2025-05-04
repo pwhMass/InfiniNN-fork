@@ -1,6 +1,8 @@
-mod embedding;
-mod linear;
-mod normalization;
+pub mod activation;
+pub mod attention;
+pub mod embedding;
+pub mod linear;
+pub mod normalization;
 
 use nn::Arg;
 type Tensor = tensor::Tensor<*const u8, 2>;
